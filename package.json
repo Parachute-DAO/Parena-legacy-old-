@@ -1,0 +1,27 @@
+{
+  "name": "parena",
+  "version": "1.0.0",
+  "description": "Parena build, contracts + opensource front end and libraries",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Parachute-DAO/Parena.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Parachute-DAO/Parena/issues"
+  },
+  "homepage": "https://github.com/Parachute-DAO/Parena#readme",
+  "dependencies": {
+    "@nomiclabs/hardhat-etherscan": "^3.0.3",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "@openzeppelin/contracts": "^4.6.0",
+    "bignumber.js": "^9.0.2",
+    "hardhat": "^2.9.3",
+    "web3": "^1.7.3"
+  }
+}
