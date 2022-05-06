@@ -1,6 +1,14 @@
 # Parena
 Parena build, contracts + opensource front end and libraries
 
+**BETA**
+Before even building the full NFT on-chain Parena, the DAO is looking to build a beta version of Parena to test the on-chain / off-chain oracle and functionalities. 
+This is a first importan step, and is hightlighted and summarized in the Parena Outline pdf document. 
+This beta will allow us to evaluate the user experience and effectiveness of an on-chain Parena. 
+It will also allow the DAO to start collect small amounts of fees to the treasury! 
+
+
+
 **TO BE UPDATED**
 
 From the community, the primary build for Parena will involve using the current UI files from Parena (to be uploaded shortly)
