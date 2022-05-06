@@ -26,10 +26,12 @@ contract BetaParena is Ownable, ReentrancyGuard, IBetaParena {
 
     address payable public treasury;
     uint256 public fee;
+    address private api;
 
-    constructor(address payable _treasury, uint256 _fee) {
+    constructor(address payable _treasury, uint256 _fee, address _api) {
         treasury = _treasury;
         fee = _fee;
+        api = _api
     }
     
     enum Status {
@@ -56,6 +58,22 @@ contract BetaParena is Ownable, ReentrancyGuard, IBetaParena {
 
     /// @notice maps the parenaId to each Parena
     mapping (uint256 => Parena) public parenas;
+
+    // ADMIN FUNCTIONS
+
+    function updateFee(uint256 _fee) external onlyOwner {
+        fee = _fee;
+    }
+
+    function updateApi(address _api) external onlyOwner {
+        api = _api;
+    }
+
+    function updateTreasury(address payable _treasury) onlyOwner {
+        treasury = _treasury;
+    }
+
+    // INTERNAL PAYMENT HANDLERS
 
     function payFees(uint256 _parenaId, address from) internal returns (bool) {
         Parena memory parena = parenas[_parenaId];
@@ -86,6 +104,8 @@ contract BetaParena is Ownable, ReentrancyGuard, IBetaParena {
         SafeERC20.safeTransfer(IERC20(parena.entryToken), parena.thirdPlace, _thirdPayout);
         SafeERC20.safeTransfer(IERC20(parena.entryToken), parena.admin, _adminPayout);
     }
+
+    // CORE FUNCTIONS FOR PARENA
 
     /// @notice function for someone to create a new Parena, they become the admin
     function createParena(
@@ -129,7 +149,7 @@ contract BetaParena is Ownable, ReentrancyGuard, IBetaParena {
         parena.status = Status.Closed;
         /// @dev get the winners from the api Call here
         // api call - getWinners()
-       (_firstPlace, _secondPlace, _thirdPlace) = api.getWinners();
+       (_firstPlace, _secondPlace, _thirdPlace) = TuringHelper(api).getWinners();
          // update winners
         parena.firstPlace = _firstPlace;
         parena.secondPlace = _secondPlace;
