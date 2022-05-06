@@ -19,7 +19,7 @@ import "./bobaTuring/ITuringHelper.sol";
 import "./interfaces/IBetaParena.sol";
 
 
-contract BetaParena is Ownable, ReentrancyGuard, IBetaParena {
+contract BetaParena is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using Counters for Counters.Counter;
     Counters.Counter private parenaIds;
@@ -35,6 +35,8 @@ contract BetaParena is Ownable, ReentrancyGuard, IBetaParena {
         api = _api;
         turing = _turing;
     }
+
+    receive() external payable {}
     
     enum Status {
         Open,
@@ -55,11 +57,11 @@ contract BetaParena is Ownable, ReentrancyGuard, IBetaParena {
         address thirdPlace;
         uint256 adminPayout;
         Status status;
-        address[] entrants;
     }
 
     /// @notice maps the parenaId to each Parena
     mapping (uint256 => Parena) public parenas;
+    mapping (uint256 => address[]) public entrants;
 
     // ADMIN FUNCTIONS
 
@@ -67,11 +69,11 @@ contract BetaParena is Ownable, ReentrancyGuard, IBetaParena {
         fee = _fee;
     }
 
-    function updateApi(address _api) external onlyOwner {
+    function updateApi(string memory _api) external onlyOwner {
         api = _api;
     }
 
-    function updateTreasury(address payable _treasury) onlyOwner {
+    function updateTreasury(address payable _treasury) external onlyOwner {
         treasury = _treasury;
     }
 
@@ -121,8 +123,8 @@ contract BetaParena is Ownable, ReentrancyGuard, IBetaParena {
         parenaIds.increment();
         uint256 parenaId = parenaIds.current();
         require(firstPayout + secondPayout + thirdPayout + adminPayout == 100, "does not add up to 100");
-        parenas[parenaId] = Parena(msg.sender, entryFee, entryToken, firstPayout, address(0), secondPayout, address(0), thirdPayout, address(0), adminPayout, Status.Open);
-        emit ParenaCreated(parenaId, msg.sender, entryFee, 0, entryToken, firstPayout, secondPayout, thirdPayout, adminPayout);
+        parenas[parenaId] = Parena(msg.sender, entryFee, 0, entryToken, firstPayout, address(0), secondPayout, address(0), thirdPayout, address(0), adminPayout, Status.Open);
+        emit ParenaCreated(parenaId, msg.sender, entryFee, entryToken, firstPayout, secondPayout, thirdPayout, adminPayout);
     }
 
     /// @notice function for someone to enter, they will pay the fee to the treasury and entry fee and then wallet is entered
@@ -132,8 +134,8 @@ contract BetaParena is Ownable, ReentrancyGuard, IBetaParena {
         bool success = payFees(_parenaId, msg.sender);
         require(success, "fees aint paid");
         /// @dev add them to the list of entrants
-        parena.entrants.push(msg.sender);
-        FighterEntered(_parenaId, msg.sender);
+        entrants[_parenaId].push(msg.sender);
+        emit FighterEntered(_parenaId, msg.sender);
     }
 
     function startParena(uint256 _parenaId) public {
@@ -153,7 +155,7 @@ contract BetaParena is Ownable, ReentrancyGuard, IBetaParena {
         // api call - getWinners()
         bytes memory request = abi.encode(_parenaId);
         bytes memory response = ITuringHelper(turing).TuringTx(api, request);
-        (_firstPlace, _secondPlace, _thirdPlace) = abi.decode(response, (address, address, address));
+        (address _firstPlace, address _secondPlace, address _thirdPlace) = abi.decode(response, (address, address, address));
          // update winners
         parena.firstPlace = _firstPlace;
         parena.secondPlace = _secondPlace;
