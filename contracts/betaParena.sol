@@ -15,7 +15,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "./bobaTuring/TuringHelper.sol";
+import "./bobaTuring/ITuringHelper.sol";
 import "./interfaces/IBetaParena.sol";
 
 
@@ -26,12 +26,14 @@ contract BetaParena is Ownable, ReentrancyGuard, IBetaParena {
 
     address payable public treasury;
     uint256 public fee;
-    address private api;
+    string private api;
+    address private turing;
 
-    constructor(address payable _treasury, uint256 _fee, address _api) {
+    constructor(address payable _treasury, uint256 _fee, string memory _api, address _turing) {
         treasury = _treasury;
         fee = _fee;
-        api = _api
+        api = _api;
+        turing = _turing;
     }
     
     enum Status {
@@ -149,7 +151,9 @@ contract BetaParena is Ownable, ReentrancyGuard, IBetaParena {
         parena.status = Status.Closed;
         /// @dev get the winners from the api Call here
         // api call - getWinners()
-       (_firstPlace, _secondPlace, _thirdPlace) = TuringHelper(api).getWinners();
+        bytes memory request = abi.encode(_parenaId);
+        bytes memory response = ITuringHelper(turing).TuringTx(api, request);
+        (_firstPlace, _secondPlace, _thirdPlace) = abi.decode(response, (address, address, address));
          // update winners
         parena.firstPlace = _firstPlace;
         parena.secondPlace = _secondPlace;
